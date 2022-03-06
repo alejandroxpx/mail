@@ -9,6 +9,24 @@ document.addEventListener('DOMContentLoaded', function() {
   // By default, load the inbox
   load_mailbox('inbox');
 });
+// Send mail once form is submitted
+function send_mail(){
+  fetch('/emails', {
+    method: 'POST',
+    body: JSON.stringify({
+        recipients: document.querySelector('#compose-recipients').value,
+        subject: document.querySelector('#compose-recipients').value,
+        body: document.querySelector('#compose-recipients').value
+    })
+  })
+  .then(response => response.json())
+  .then(result => {
+      // Print result
+      console.log(result);
+  });
+  // Load sent mailbox
+  load_mailbox('sent')
+}
 
 function compose_email() {
 
@@ -21,22 +39,12 @@ function compose_email() {
   document.querySelector('#compose-subject').value = '';
   document.querySelector('#compose-body').value = '';
 
-  // Send mail
-  document.querySelector('form').onsubmit = () => {
-    fetch('/emails',{
-      method: 'POST',
-      body: JSON.stringify({
-        recipients: 'foo@email.com',//document.querySelector('#compose-recipient').value,
-        subject: 'test',//document.querySelector('#compose-subject').value,
-        body: 'test',//document.querySelector('#compose-body').value
-      })
-    })
-    .then(response => response.json())
-    .then(result =>{
-      console.log(result);
-    });
-    return false;
+  // Send mail once form is submitted
+  document.querySelector('form').onsubmit = function() {
+  send_mail()
+  return false;
   };
+  
 }
 
 function load_mailbox(mailbox) {
@@ -47,4 +55,14 @@ function load_mailbox(mailbox) {
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+
+  // Show mailbox content
+  fetch('/emails/sent')
+.then(response => response.json())
+.then(emails => {
+    // Print emails
+    console.log(emails);
+
+    // ... do something else with emails ...
+});
 }
