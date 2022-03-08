@@ -1,3 +1,10 @@
 textarea {
     min-height: 400px;
 }
+#emails-view .email{
+    border: 1px solid black;
+    display: felx;
+    flex-direction: column;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}

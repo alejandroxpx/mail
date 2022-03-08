@@ -14,9 +14,9 @@ function send_mail(){
   fetch('/emails', {
     method: 'POST',
     body: JSON.stringify({
-        recipients: document.querySelector('#compose-recipients').value,
-        subject: document.querySelector('#compose-recipients').value,
-        body: document.querySelector('#compose-recipients').value
+        recipients: document.querySelector('#compose-recipients').value(),
+        subject: document.querySelector('#compose-subject').value(),
+        body: document.querySelector('#compose-body').value()
     })
   })
   .then(response => response.json())
@@ -46,7 +46,29 @@ function compose_email() {
   };
   
 }
+function display(emails){
+  alert(emails[0].id)
+  top_of_page = 0
+  bottom_of_page = 5
+  // Whe DOM loads, render the first 20 emails
+  document.addEventListener('DOMContentLoaded', load);
+  for (let i = 0; i <5;i++){ 
+    load(emails[i].id)
+  }
 
+  function load(count){
+    fetch(`/emails/${count}`)
+    .then(response => response.json())
+    .then(email =>{
+      console.log(email);
+      const element = document.createElement('div');
+      element.className = 'email'
+      element.innerHTML = "From: "+email.sender +"<br>" + "Subject: "+email.subject +"<br> Body: "+email.body+
+      "<br>"+ "TimeStamp: "+ email.timestamp + " id:" + email.id;
+      document.querySelector('#emails-view').append(element);
+    });
+  }
+}
 function load_mailbox(mailbox) {
   
   // Show the mailbox and hide other views
@@ -57,12 +79,11 @@ function load_mailbox(mailbox) {
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
 
   // Show mailbox content
-  fetch('/emails/sent')
-.then(response => response.json())
-.then(emails => {
-    // Print emails
-    console.log(emails);
-
-    // ... do something else with emails ...
-});
+  fetch(`/emails/${mailbox}`)
+  .then(response => response.json())
+  .then(emails => {
+    console.log(emails)
+    //Display the emails
+    display(emails)
+  });
 }
