@@ -57,37 +57,56 @@ function load_mailbox(mailbox) {
   fetch(`/emails/${mailbox}`)
   .then(response => response.json())
   .then(emails =>{
-    console.log(emails)
+    // console.log("elementy",emails)
     emails.forEach(element => {
-        add_email(element)
+        // add all the emails onto single page
+        add_email_to_mailbox(element)
     });
   });
   
-  function add_email(email){
-    const element = document.createElement('div');
-    element.className = 'email'
-    element.innerHTML = "From: "+email.sender +
-    "<br>" +"To: "+email.recipients+
-    "<br>"+"Subject: "+email.subject +"<br> Body:"
-    +"<p>"+email.body+"</p>"+ "TimeStamp: "+ email.timestamp +
-    "<br>"+ " id: " + email.id
-    +"<br>"+ email.read;
+  function add_email_to_mailbox(email){
+    // create a button for each email
+    const element = document.createElement('button');
+    element.className = "email"
+    element.id = email.id
+    element.innerHTML = 
+    "From: " + email.sender +
+    "<br> To: " + email.recipients+
+    "<br> Subject: " + email.subject +
+    "<br> Body:" + "<p>" + email.body + "</p>" + "TimeStamp: " + email.timestamp +
+    "<br> id: " + email.id +
+    "<br> Read: " + email.read;
+    // Add emails to #emails-view div
     document.querySelector('#emails-view').append(element);
-    document.querySelector('#emails-view').onclick = view_email(email.id);
-    if(email.read == true){
-      document.querySelector('.email').style.backgroundColor = "grey";
-    }
-    else if(email.read == false){
-      document.querySelector('.email').style.backgroundColor = "white";
-    }
+    // if a button is clicked, show that email and hide all other email
+    document.querySelector(`button#${element.id}.email`).onclick = alert(``)
   }
 
-  function view_email(email_id){
-    
-  }
+  function view_selected_email(email_id)
+  {
+    fetch(`/emails/${email_id}`)
+      .then(response => response.json())
+      .then(email =>
+      {
+        console.log(email)
+        const element = document.createElement('div');
+        element.id = 'view-email'
+        // alert(`Cl÷icked`)
+        element.innerHTML = "From: "+email.sender +
+        "<br>" +"To: "+email.recipients+
+        "<br>"+"Subject: "+email.subject +"<br> Body:"
+        +"<p>"+email.body+"</p>"+ "TimeStamp: "+ email.timestamp +
+        "<br>"+ " id: " + email.id
+        +"<br>"+ "Read: "+email.read;
+        document.querySelector('.container').append(element);
+        document.querySelector('#emails-view').style.display = 'none';
+        document.querySelector('#compose-view').style.display = 'none';
+        document.querySelector('#view-email').style.display = 'block';
+      });
+  }// End view_selected_mail()
 
 
 
-}
+}// End load_mailbox()
 
 
