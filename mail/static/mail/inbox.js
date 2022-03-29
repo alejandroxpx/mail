@@ -51,6 +51,7 @@ function load_mailbox(mailbox) {
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
+  // document.querySelector('#view-email').style.display = 'none';
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
   // GET request mailbox and add each email to page
@@ -73,13 +74,17 @@ function load_mailbox(mailbox) {
     "From: " + email.sender +
     "<br> To: " + email.recipients+
     "<br> Subject: " + email.subject +
-    "<br> Body:" + "<p>" + email.body + "</p>" + "TimeStamp: " + email.timestamp +
-    "<br> id: " + email.id +
-    "<br> Read: " + email.read;
+    "<hr>" + "<p>" + email.body + "</p>";// + "TimeStamp: " + email.timestamp +
+    // "<br> id: " + email.id +
+    // "<br> Read: " + email.read;
     // Add emails to #emails-view div
     document.querySelector('#emails-view').append(element);
     // if a button is clicked, show that email and hide all other email
-    document.querySelector(`button#${element.id}.email`).onclick = alert(``)
+    element.onclick = function() {
+      view_selected_email(element.id)
+      // alert(`${mailbox}`)
+    }
+    
   }
 
   function view_selected_email(email_id)
@@ -88,25 +93,65 @@ function load_mailbox(mailbox) {
       .then(response => response.json())
       .then(email =>
       {
-        console.log(email)
         const element = document.createElement('div');
         element.id = 'view-email'
-        // alert(`Cl÷icked`)
-        element.innerHTML = "From: "+email.sender +
-        "<br>" +"To: "+email.recipients+
-        "<br>"+"Subject: "+email.subject +"<br> Body:"
-        +"<p>"+email.body+"</p>"+ "TimeStamp: "+ email.timestamp +
-        "<br>"+ " id: " + email.id
-        +"<br>"+ "Read: "+email.read;
+        console.log(email)
+
+        if (mailbox == 'inbox'){
+          element.innerHTML =
+          "<h3> Inbox</h3><br>"+
+          "From: "+email.sender +
+          "<br>" +"To: "+email.recipients+
+          "<br>"+"Subject: "+email.subject +"<hr><br>"+
+          "<p>"+email.body+"</p>"+
+          "<button class='btn btn-sm btn-outline-primary' id = 'archive' type = 'button'>Archive</button>";
+        }
+        if(mailbox == 'sent'){
+          element.innerHTML = 
+          "<h3> Sent </h3><br>" +
+          "From: "+email.sender +
+          "<br>" +"To: "+email.recipients+
+          "<br>"+"Subject: "+email.subject +"<hr><br>"+
+          "<p>"+email.body+"</p>";
+        }
+        if(mailbox == 'archive'){
+          element.innerHTML =
+          "<h3> Archive </h3><br>" +
+          "From: "+email.sender +
+          "<br>" +"To: "+email.recipients+
+          "<br>"+"Subject: "+email.subject +"<hr><br>"+
+          "<p>"+email.body+"</p>"+
+          "<button class='btn btn-sm btn-outline-primary' id = 'unarchive' type = 'button'>Unarchive</button>";
+        }
         document.querySelector('.container').append(element);
         document.querySelector('#emails-view').style.display = 'none';
         document.querySelector('#compose-view').style.display = 'none';
         document.querySelector('#view-email').style.display = 'block';
+        // Mark email as read
+        email_marked_as_read(email_id)
+        // Archive when archive button is clicked
+        document.querySelector
       });
   }// End view_selected_mail()
 
+  function email_marked_as_read(email_id){
+    fetch(`/emails/${email_id}`,{
+      method: 'PUT',
+      body: JSON.stringify({
+        read: true
+      })
+    })
+  }// End email_marked_as_read()
 
-
+  function archive_email(email_id){
+    alert(`archived`)
+    fetch(`/emails/${email_id}`,{
+      method: 'PUT',
+      body: JSON.stringify({
+        archived: true
+      })
+    })
+  }// End archive_email()
 }// End load_mailbox()
 
 
