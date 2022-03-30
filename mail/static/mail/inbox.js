@@ -8,7 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // By default, load the inbox
   load_mailbox('inbox');
-});
+});// Load DOMContent
+
 // Send mail once form is submitted
 function send_mail(){
   fetch('/emails', {
@@ -26,8 +27,9 @@ function send_mail(){
   });
   // Load sent mailbox
   load_mailbox('sent')
-}
+}// End send_mail()
 
+// form to fill our to send email
 function compose_email() {
 
   // Show compose view and hide other views
@@ -45,13 +47,15 @@ function compose_email() {
   return false;
   };
    
-}
+}// End compose_email()
+
+// Load all emails from specific mailbox
 function load_mailbox(mailbox) {
   
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
-  // document.querySelector('#view-email').style.display = 'none';
+
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
   // GET request mailbox and add each email to page
@@ -64,7 +68,8 @@ function load_mailbox(mailbox) {
         add_email_to_mailbox(element)
     });
   });
-  
+
+  // insert email content onto screen
   function add_email_to_mailbox(email){
     // create a button for each email
     const element = document.createElement('button');
@@ -73,11 +78,10 @@ function load_mailbox(mailbox) {
     element.innerHTML = 
     "From: " + email.sender +
     "<br> To: " + email.recipients+
-    "<br> Subject: " + email.subject +
+    "<br> Subject: " + email.subject +"<br>"+
+    "read: "+email.read+"<br>"+
     "<hr>" + "<p>" + email.body + "</p>";// + "TimeStamp: " + email.timestamp +
-    // "<br> id: " + email.id +
-    // "<br> Read: " + email.read;
-    // Add emails to #emails-view div
+ 
     document.querySelector('#emails-view').append(element);
     // if a button is clicked, show that email and hide all other email
     element.onclick = function() {
@@ -85,8 +89,9 @@ function load_mailbox(mailbox) {
       // alert(`${mailbox}`)
     }
     
-  }
+  }// End add_email_to_mailbox
 
+  // When email clicked on, hide other div's and show email that was clicked
   function view_selected_email(email_id)
   {
     fetch(`/emails/${email_id}`)
@@ -95,33 +100,53 @@ function load_mailbox(mailbox) {
       {
         const element = document.createElement('div');
         element.id = 'view-email'
-        console.log(email)
-
+        // console.log(email)
+        if(email.read == true){
+          element.style.backgroundColor = "#D3D3D3"
+        }
+        else if (email.read == false){
+          element.style.backgroundColor = "white"
+        }
         if (mailbox == 'inbox'){
           element.innerHTML =
-          "<h3> Inbox</h3><br>"+
+          // "<h3> Inbox</h3><br>"+
           "From: "+email.sender +
           "<br>" +"To: "+email.recipients+
           "<br>"+"Subject: "+email.subject +"<hr><br>"+
           "<p>"+email.body+"</p>"+
+          "read:"+email.read+"<br>"+
           "<button class='btn btn-sm btn-outline-primary' id = 'archive' type = 'button'>Archive</button>";
+          element.style.border = "1px solid black";
+          element.style.padding= "5px 10px";
+          // Archive when archive button is clicked
+          document.querySelector("button#archive.btn.btn-sm.btn-outline-primary").onclick=function(){
+            archive_email(email.id)
         }
-        if(mailbox == 'sent'){
+        }
+        else if(mailbox == 'sent'){
           element.innerHTML = 
           "<h3> Sent </h3><br>" +
           "From: "+email.sender +
           "<br>" +"To: "+email.recipients+
           "<br>"+"Subject: "+email.subject +"<hr><br>"+
+          "read:"+email.read +"<br>"+
           "<p>"+email.body+"</p>";
+          element.style.border = "1px solid black";
+          element.style.padding= "5px 10px";
         }
-        if(mailbox == 'archive'){
+        else if(mailbox == 'archive'){
           element.innerHTML =
           "<h3> Archive </h3><br>" +
           "From: "+email.sender +
           "<br>" +"To: "+email.recipients+
           "<br>"+"Subject: "+email.subject +"<hr><br>"+
           "<p>"+email.body+"</p>"+
+          "read:"+email.read+"<br>"+
           "<button class='btn btn-sm btn-outline-primary' id = 'unarchive' type = 'button'>Unarchive</button>";
+          element.style.border = "1px solid black";
+          element.style.padding= "5px 10px";
+          // Archive when archive button is clicked
+          
         }
         document.querySelector('.container').append(element);
         document.querySelector('#emails-view').style.display = 'none';
@@ -129,12 +154,12 @@ function load_mailbox(mailbox) {
         document.querySelector('#view-email').style.display = 'block';
         // Mark email as read
         email_marked_as_read(email_id)
-        // Archive when archive button is clicked
-        document.querySelector
       });
   }// End view_selected_mail()
 
+  // mark email as read when clicked
   function email_marked_as_read(email_id){
+    // alert(`Email read with id ${email_id} has been read.`)
     fetch(`/emails/${email_id}`,{
       method: 'PUT',
       body: JSON.stringify({
@@ -142,7 +167,8 @@ function load_mailbox(mailbox) {
       })
     })
   }// End email_marked_as_read()
-
+  
+  // archive email when cilcked on archive button
   function archive_email(email_id){
     alert(`archived`)
     fetch(`/emails/${email_id}`,{
@@ -152,6 +178,17 @@ function load_mailbox(mailbox) {
       })
     })
   }// End archive_email()
+
+  // unarchive email when cilcked on archive button
+  function unarchive_email(email_id){
+    alert(`unarchived`)
+    fetch(`/emails/${email_id}`,{
+      method: 'PUT',
+      body: JSON.stringify({
+        archived: false
+      })
+    })
+  }// End unarchive_email()
 }// End load_mailbox()
 
 

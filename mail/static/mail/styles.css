@@ -10,4 +10,8 @@ button.email{
     display: block; /* Make the buttons appear below each other */
     margin-bottom: 10px;
     text-align: left;
+    background: white;
+}
+.btn-sm button{
+    border: 1px solid black
 }
