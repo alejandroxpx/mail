@@ -109,7 +109,7 @@ function load_mailbox(mailbox) {
         }
         if (mailbox == 'inbox'){
           element.innerHTML =
-          // "<h3> Inbox</h3><br>"+
+          "<h3> Viewing Selected Email</h3><br>"+
           "From: "+email.sender +
           "<br>" +"To: "+email.recipients+
           "<br>"+"Subject: "+email.subject +"<hr><br>"+
@@ -118,10 +118,6 @@ function load_mailbox(mailbox) {
           "<button class='btn btn-sm btn-outline-primary' id = 'archive' type = 'button'>Archive</button>";
           element.style.border = "1px solid black";
           element.style.padding= "5px 10px";
-          // Archive when archive button is clicked
-          document.querySelector("button#archive.btn.btn-sm.btn-outline-primary").onclick=function(){
-            archive_email(email.id)
-        }
         }
         else if(mailbox == 'sent'){
           element.innerHTML = 
@@ -146,11 +142,10 @@ function load_mailbox(mailbox) {
           element.style.border = "1px solid black";
           element.style.padding= "5px 10px";
           // Archive when archive button is clicked
-          
         }
         document.querySelector('.container').append(element);
         document.querySelector('#emails-view').style.display = 'none';
-        document.querySelector('#compose-view').style.display = 'none';
+        // document.querySelector('#compose-view').style.display = 'none';
         document.querySelector('#view-email').style.display = 'block';
         // Mark email as read
         email_marked_as_read(email_id)
