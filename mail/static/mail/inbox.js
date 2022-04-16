@@ -29,7 +29,7 @@ function send_mail(){
   load_mailbox('sent')
 }// End send_mail()
 
-// form to fill our to send email
+// Form to fill out to send email
 function compose_email() {
 
   // Show compose view and hide other views
@@ -49,12 +49,27 @@ function compose_email() {
    
 }// End compose_email()
 
+// Clear the contents of a div
+function clear_content(elementID){
+  alert(elementID)
+  document.querySelector(elementID).innerHTML = "";
+}// End clear_content()
+
 // Load all emails from specific mailbox
 function load_mailbox(mailbox) {
-  
+
+  // Clear any content previously selected
+  // clear_content(`"view-email"`)
+
+  // Create a div when selecting an email
+  const element = document.createElement('div');
+  element.id = 'view-email'
+  document.querySelector('.container').append(element);
+
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#view-email').style.display = 'none';
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
@@ -98,8 +113,8 @@ function load_mailbox(mailbox) {
       .then(response => response.json())
       .then(email =>
       {
-        const element = document.createElement('div');
-        element.id = 'view-email'
+        // const element = document.createElement('div');
+        // element.id = 'view-email'
         // console.log(email)
         if(email.read == true){
           element.style.backgroundColor = "#D3D3D3"
@@ -108,6 +123,7 @@ function load_mailbox(mailbox) {
           element.style.backgroundColor = "white"
         }
         if (mailbox == 'inbox'){
+          clear_content("view-email")
           element.innerHTML =
           "<h3> Viewing Selected Email</h3><br>"+
           "From: "+email.sender +
