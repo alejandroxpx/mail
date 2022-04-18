@@ -51,15 +51,17 @@ function compose_email() {
 
 // Clear the contents of a div
 function clear_content(elementID){
-  alert(elementID)
-  document.querySelector(elementID).innerHTML = "";
+  // alert(elementID)
+  document.querySelector('#view-email').innerHTML = '';
+  // var element = document.getElementById("view-email")
+  // element.parentNode.removeChild(element);
 }// End clear_content()
 
 // Load all emails from specific mailbox
 function load_mailbox(mailbox) {
 
   // Clear any content previously selected
-  // clear_content(`"view-email"`)
+  // clear_content("\"view-email\"")
 
   // Create a div when selecting an email
   const element = document.createElement('div');
@@ -116,6 +118,11 @@ function load_mailbox(mailbox) {
         // const element = document.createElement('div');
         // element.id = 'view-email'
         // console.log(email)
+
+          // Show the mailbox and hide other views
+        document.querySelector('#emails-view').style.display = 'block';
+        document.querySelector('#compose-view').style.display = 'none';
+        document.querySelector('#view-email').style.display = 'none';
         if(email.read == true){
           element.style.backgroundColor = "#D3D3D3"
         }
@@ -123,7 +130,7 @@ function load_mailbox(mailbox) {
           element.style.backgroundColor = "white"
         }
         if (mailbox == 'inbox'){
-          clear_content("view-email")
+          clear_content(`\"view-email\"`)
           element.innerHTML =
           "<h3> Viewing Selected Email</h3><br>"+
           "From: "+email.sender +
@@ -136,6 +143,7 @@ function load_mailbox(mailbox) {
           element.style.padding= "5px 10px";
         }
         else if(mailbox == 'sent'){
+          // clear_content(`\"view-email\"`)
           element.innerHTML = 
           "<h3> Sent </h3><br>" +
           "From: "+email.sender +
@@ -147,6 +155,7 @@ function load_mailbox(mailbox) {
           element.style.padding= "5px 10px";
         }
         else if(mailbox == 'archive'){
+          clear_content(`\"view-email\"`)
           element.innerHTML =
           "<h3> Archive </h3><br>" +
           "From: "+email.sender +
@@ -159,10 +168,12 @@ function load_mailbox(mailbox) {
           element.style.padding= "5px 10px";
           // Archive when archive button is clicked
         }
-        document.querySelector('.container').append(element);
+
         document.querySelector('#emails-view').style.display = 'none';
-        // document.querySelector('#compose-view').style.display = 'none';
+        document.querySelector('#compose-view').style.display = 'none';
         document.querySelector('#view-email').style.display = 'block';
+        document.querySelector('.container').append(element);
+
         // Mark email as read
         email_marked_as_read(email_id)
       });
