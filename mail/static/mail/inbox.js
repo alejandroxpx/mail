@@ -1,3 +1,4 @@
+// Load buttons and initial content
 document.addEventListener('DOMContentLoaded', function() {
 
   // Use buttons to toggle between views
@@ -23,7 +24,7 @@ function send_mail(){
   .then(response => response.json())
   .then(result => {
       // Print result
-      console.log(result);
+      // console.log(result);
   });
   // Load sent mailbox
   load_mailbox('sent')
@@ -64,9 +65,10 @@ function load_mailbox(mailbox) {
   // clear_content("\"view-email\"")
 
   // Create a div when selecting an email
-  const element = document.createElement('div');
+  let element = document.createElement('div');
   element.id = 'view-email'
-  document.querySelector('.container').append(element);
+  document.body.appendChild(element)
+  // document.querySelector('.container').append(element);
 
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
@@ -82,12 +84,13 @@ function load_mailbox(mailbox) {
     // console.log("elementy",emails)
     emails.forEach(element => {
         // add all the emails onto single page
-        add_email_to_mailbox(element)
+        add_email_to_mailbox(element,mailbox)
     });
   });
+}// End load_mailbox()
 
-  // insert email content onto screen
-  function add_email_to_mailbox(email){
+// insert email content onto screen
+function add_email_to_mailbox(email,mailbox){
     // create a button for each email
     const element = document.createElement('button');
     element.className = "email"
@@ -102,27 +105,28 @@ function load_mailbox(mailbox) {
     document.querySelector('#emails-view').append(element);
     // if a button is clicked, show that email and hide all other email
     element.onclick = function() {
-      view_selected_email(element.id)
-      // alert(`${mailbox}`)
+      view_selected_email(element.id,mailbox)
+      // console.log(element)
     }
-    
-  }// End add_email_to_mailbox
+}// End add_email_to_mailbox
 
-  // When email clicked on, hide other div's and show email that was clicked
-  function view_selected_email(email_id)
+// When email clicked on, hide other div's and show email that was clicked
+function view_selected_email(email_id,mailbox)
+
   {
     fetch(`/emails/${email_id}`)
       .then(response => response.json())
       .then(email =>
       {
-        // const element = document.createElement('div');
-        // element.id = 'view-email'
+        console.log(email)
+        const element = document.createElement('div');
+        element.id = 'view-email'
         // console.log(email)
 
           // Show the mailbox and hide other views
-        document.querySelector('#emails-view').style.display = 'block';
+        document.querySelector('#emails-view').style.display = 'none';
         document.querySelector('#compose-view').style.display = 'none';
-        document.querySelector('#view-email').style.display = 'none';
+        document.querySelector('#view-email').style.display = 'block';
         if(email.read == true){
           element.style.backgroundColor = "#D3D3D3"
         }
@@ -172,15 +176,15 @@ function load_mailbox(mailbox) {
         document.querySelector('#emails-view').style.display = 'none';
         document.querySelector('#compose-view').style.display = 'none';
         document.querySelector('#view-email').style.display = 'block';
-        document.querySelector('.container').append(element);
-
+        // document.querySelector('.container').append(element);
+        document.body.appendChild(element)
         // Mark email as read
         email_marked_as_read(email_id)
       });
-  }// End view_selected_mail()
+}// End view_selected_mail()
 
-  // mark email as read when clicked
-  function email_marked_as_read(email_id){
+// mark email as read when clicked
+function email_marked_as_read(email_id){
     // alert(`Email read with id ${email_id} has been read.`)
     fetch(`/emails/${email_id}`,{
       method: 'PUT',
@@ -188,10 +192,10 @@ function load_mailbox(mailbox) {
         read: true
       })
     })
-  }// End email_marked_as_read()
+}// End email_marked_as_read()
   
-  // archive email when cilcked on archive button
-  function archive_email(email_id){
+// archive email when cilcked on archive button
+function archive_email(email_id){
     alert(`archived`)
     fetch(`/emails/${email_id}`,{
       method: 'PUT',
@@ -199,10 +203,10 @@ function load_mailbox(mailbox) {
         archived: true
       })
     })
-  }// End archive_email()
+}// End archive_email()
 
-  // unarchive email when cilcked on archive button
-  function unarchive_email(email_id){
+// unarchive email when cilcked on archive button
+function unarchive_email(email_id){
     alert(`unarchived`)
     fetch(`/emails/${email_id}`,{
       method: 'PUT',
@@ -210,7 +214,7 @@ function load_mailbox(mailbox) {
         archived: false
       })
     })
-  }// End unarchive_email()
-}// End load_mailbox()
+}// End unarchive_email()
+
 
 
