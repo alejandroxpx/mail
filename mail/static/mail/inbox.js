@@ -1,3 +1,4 @@
+var globalCounter = 0;
 // Load buttons and initial content
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -32,10 +33,20 @@ function send_mail(){
 
 // Form to fill out to send email
 function compose_email() {
+    
+  // Increment globalCounter when entering this function i.e. tab button clicked
+  // globalCounter +=1;
 
+  // if globalVariable is greater than 1 regresh the page
+  // if (globalCounter >1){
+  //   location.reload();
+  //   globalCounter = 0;
+  //   console.log('Page reloaded.')
+  // }
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
+  document.querySelector('#view-email').style.display = 'none';
 
   // Clear out composition fields
   document.querySelector('#compose-recipients').value = '';
@@ -51,24 +62,25 @@ function compose_email() {
 }// End compose_email()
 
 // Clear the contents of a div
-function clear_content(elementID){
-  // alert(elementID)
-  document.querySelector('#view-email').innerHTML = '';
-  // var element = document.getElementById("view-email")
-  // element.parentNode.removeChild(element);
+function clear_content(elementClass){
+  var i;
+  var x = document.getElementsByClassName(elementClass);
+  alert(x)
+  for(i=0;i<x.length;i++){
+      x[i].style.display = "none";
+  }
+// document.getElementById(tabName).style.display = "block";
 }// End clear_content()
 
 // Load all emails from specific mailbox
 function load_mailbox(mailbox) {
-
-  // Clear any content previously selected
-  // clear_content("\"view-email\"")
-
   // Create a div when selecting an email
   let element = document.createElement('div');
   element.id = 'view-email'
-  document.body.appendChild(element)
-  // document.querySelector('.container').append(element);
+  element.className = 'view-email'
+  document.querySelector('.container').append(element);
+  //Close out any other divs by clearing the out
+  clear_content(element.className)
 
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
@@ -91,29 +103,38 @@ function load_mailbox(mailbox) {
 
 // insert email content onto screen
 function add_email_to_mailbox(email,mailbox){
-    // create a button for each email
-    const element = document.createElement('button');
-    element.className = "email"
-    element.id = email.id
-    element.innerHTML = 
-    "From: " + email.sender +
-    "<br> To: " + email.recipients+
-    "<br> Subject: " + email.subject +"<br>"+
-    "read: "+email.read+"<br>"+
-    "<hr>" + "<p>" + email.body + "</p>";// + "TimeStamp: " + email.timestamp +
- 
-    document.querySelector('#emails-view').append(element);
-    // if a button is clicked, show that email and hide all other email
-    element.onclick = function() {
-      view_selected_email(element.id,mailbox)
-      // console.log(element)
-    }
+
+  // create a button for each email
+  const element = document.createElement('div');
+  // element.className = "email"
+  element.id = "email"
+  element.className = "email-content"
+  element.innerHTML = 
+  "From: " + email.sender +
+  "<br> To: " + email.recipients+
+  "<br> Subject: " + email.subject +"<br>"+
+  "read: "+email.read+"<br>"+
+  "<hr>" + "<p>" + email.body + "</p>";// + "TimeStamp: " + email.timestamp +
+
+  if(email.read == true){
+    element.style.backgroundColor = "#D3D3D3"
+  }
+  else if (email.read == false){
+    element.style.backgroundColor = "white"
+  }
+  
+  document.querySelector('#emails-view').append(element);
+  // if a button is clicked, show that email and hide all other email
+  element.onclick = function() {
+    view_selected_email(email.id,mailbox)
+    // console.log(element)
+  }
 }// End add_email_to_mailbox
 
 // When email clicked on, hide other div's and show email that was clicked
-function view_selected_email(email_id,mailbox)
-
-  {
+function view_selected_email(email_id,mailbox){
+    // var csrftoken = Cookies.get('csrftoken');
+    // xhr.setRequestHeader("X-CSRFToken", csrftoken);
     fetch(`/emails/${email_id}`)
       .then(response => response.json())
       .then(email =>
@@ -121,6 +142,7 @@ function view_selected_email(email_id,mailbox)
         console.log(email)
         const element = document.createElement('div');
         element.id = 'view-email'
+        element.className = 'view-email'
         // console.log(email)
 
           // Show the mailbox and hide other views
@@ -134,7 +156,7 @@ function view_selected_email(email_id,mailbox)
           element.style.backgroundColor = "white"
         }
         if (mailbox == 'inbox'){
-          clear_content(`\"view-email\"`)
+          // clear_content()
           element.innerHTML =
           "<h3> Viewing Selected Email</h3><br>"+
           "From: "+email.sender +
@@ -147,7 +169,6 @@ function view_selected_email(email_id,mailbox)
           element.style.padding= "5px 10px";
         }
         else if(mailbox == 'sent'){
-          // clear_content(`\"view-email\"`)
           element.innerHTML = 
           "<h3> Sent </h3><br>" +
           "From: "+email.sender +
@@ -157,9 +178,10 @@ function view_selected_email(email_id,mailbox)
           "<p>"+email.body+"</p>";
           element.style.border = "1px solid black";
           element.style.padding= "5px 10px";
+          clear_content("view-email")
         }
         else if(mailbox == 'archive'){
-          clear_content(`\"view-email\"`)
+          // clear_content()
           element.innerHTML =
           "<h3> Archive </h3><br>" +
           "From: "+email.sender +
@@ -176,16 +198,20 @@ function view_selected_email(email_id,mailbox)
         document.querySelector('#emails-view').style.display = 'none';
         document.querySelector('#compose-view').style.display = 'none';
         document.querySelector('#view-email').style.display = 'block';
-        // document.querySelector('.container').append(element);
-        document.body.appendChild(element)
-        // Mark email as read
+
+        // Adding the clicked email onto the DOMContent
+        document.querySelector('.container').append(element);
+
+        // document.body.appendChild(element)
+      
+        // Mark email as read  
         email_marked_as_read(email_id)
+
       });
 }// End view_selected_mail()
 
 // mark email as read when clicked
 function email_marked_as_read(email_id){
-    // alert(`Email read with id ${email_id} has been read.`)
     fetch(`/emails/${email_id}`,{
       method: 'PUT',
       body: JSON.stringify({
@@ -215,6 +241,3 @@ function unarchive_email(email_id){
       })
     })
 }// End unarchive_email()
-
-
-
