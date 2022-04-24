@@ -1,4 +1,3 @@
-var globalCounter = 0;
 // Load buttons and initial content
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -24,8 +23,6 @@ function send_mail(){
   })
   .then(response => response.json())
   .then(result => {
-      // Print result
-      // console.log(result);
   });
   // Load sent mailbox
   load_mailbox('sent')
@@ -34,15 +31,6 @@ function send_mail(){
 // Form to fill out to send email
 function compose_email() {
     
-  // Increment globalCounter when entering this function i.e. tab button clicked
-  // globalCounter +=1;
-
-  // if globalVariable is greater than 1 regresh the page
-  // if (globalCounter >1){
-  //   location.reload();
-  //   globalCounter = 0;
-  //   console.log('Page reloaded.')
-  // }
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
@@ -52,7 +40,28 @@ function compose_email() {
   document.querySelector('#compose-recipients').value = '';
   document.querySelector('#compose-subject').value = '';
   document.querySelector('#compose-body').value = '';
+  
+  // Send mail once form is submitted
+  document.querySelector('form').onsubmit = function() {
+  send_mail()
+  return false;
+  };
+   
+}// End compose_email()
 
+// Form to fill out to send email
+function compose_email_reply(recipients,subject,body,timestamp) {
+    
+  // Show compose view and hide other views
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'block';
+  document.querySelector('#view-email').style.display = 'none';
+
+  // Clear out composition fields
+  document.querySelector('#compose-recipients').value = recipients;
+  document.querySelector('#compose-subject').value = `Re: ${subject}`;
+  document.querySelector('#compose-body').value = `On ${timestamp} ${recipients} wrote: ${body} `;
+  clear_content("view-email")
   // Send mail once form is submitted
   document.querySelector('form').onsubmit = function() {
   send_mail()
@@ -65,11 +74,9 @@ function compose_email() {
 function clear_content(elementClass){
   var i;
   var x = document.getElementsByClassName(elementClass);
-  alert(x)
   for(i=0;i<x.length;i++){
       x[i].style.display = "none";
   }
-// document.getElementById(tabName).style.display = "block";
 }// End clear_content()
 
 // Load all emails from specific mailbox
@@ -78,6 +85,7 @@ function load_mailbox(mailbox) {
   let element = document.createElement('div');
   element.id = 'view-email'
   element.className = 'view-email'
+  element.read = false
   document.querySelector('.container').append(element);
   //Close out any other divs by clearing the out
   clear_content(element.className)
@@ -103,18 +111,15 @@ function load_mailbox(mailbox) {
 
 // insert email content onto screen
 function add_email_to_mailbox(email,mailbox){
-
   // create a button for each email
   const element = document.createElement('div');
-  // element.className = "email"
   element.id = "email"
   element.className = "email-content"
   element.innerHTML = 
   "From: " + email.sender +
   "<br> To: " + email.recipients+
   "<br> Subject: " + email.subject +"<br>"+
-  "read: "+email.read+"<br>"+
-  "<hr>" + "<p>" + email.body + "</p>";// + "TimeStamp: " + email.timestamp +
+  "<hr>" + "<p>" + email.body + "</p>";
 
   if(email.read == true){
     element.style.backgroundColor = "#D3D3D3"
@@ -122,19 +127,16 @@ function add_email_to_mailbox(email,mailbox){
   else if (email.read == false){
     element.style.backgroundColor = "white"
   }
-  
   document.querySelector('#emails-view').append(element);
+
   // if a button is clicked, show that email and hide all other email
   element.onclick = function() {
     view_selected_email(email.id,mailbox)
-    // console.log(element)
   }
 }// End add_email_to_mailbox
 
 // When email clicked on, hide other div's and show email that was clicked
 function view_selected_email(email_id,mailbox){
-    // var csrftoken = Cookies.get('csrftoken');
-    // xhr.setRequestHeader("X-CSRFToken", csrftoken);
     fetch(`/emails/${email_id}`)
       .then(response => response.json())
       .then(email =>
@@ -143,7 +145,6 @@ function view_selected_email(email_id,mailbox){
         const element = document.createElement('div');
         element.id = 'view-email'
         element.className = 'view-email'
-        // console.log(email)
 
           // Show the mailbox and hide other views
         document.querySelector('#emails-view').style.display = 'none';
@@ -156,17 +157,29 @@ function view_selected_email(email_id,mailbox){
           element.style.backgroundColor = "white"
         }
         if (mailbox == 'inbox'){
-          // clear_content()
           element.innerHTML =
           "<h3> Viewing Selected Email</h3><br>"+
           "From: "+email.sender +
           "<br>" +"To: "+email.recipients+
           "<br>"+"Subject: "+email.subject +"<hr><br>"+
           "<p>"+email.body+"</p>"+
-          "read:"+email.read+"<br>"+
-          "<button class='btn btn-sm btn-outline-primary' id = 'archive' type = 'button'>Archive</button>";
+          "<button id = 'reply' type = 'button'>Reply</button>"+
+          "<button id = 'archive' type = 'button' style='float: right'>Archive</button><br>";
           element.style.border = "1px solid black";
           element.style.padding= "5px 10px";
+          // Mark email as read  
+          email_marked_as_read(email_id)
+          // Adding the clicked email onto the DOMContent
+          document.querySelector('.container').append(element);
+          document.querySelector('button#archive').onclick = ()=>{
+            archive_email(email.id);
+            load_mailbox('inbox')
+          }
+          //Load compose form when user clicks on reply
+          document.querySelector('button#reply').onclick = () =>{
+            compose_email_reply(email.recipients,email.subject,email.body,email.timestamp)
+          }
+
         }
         else if(mailbox == 'sent'){
           element.innerHTML = 
@@ -175,13 +188,13 @@ function view_selected_email(email_id,mailbox){
           "<br>" +"To: "+email.recipients+
           "<br>"+"Subject: "+email.subject +"<hr><br>"+
           "read:"+email.read +"<br>"+
-          "<p>"+email.body+"</p>";
+          "<p>"+email.body+"</p>" +
+          "<button id = 'reply' type = 'button'>Reply</button>";
           element.style.border = "1px solid black";
           element.style.padding= "5px 10px";
           clear_content("view-email")
         }
         else if(mailbox == 'archive'){
-          // clear_content()
           element.innerHTML =
           "<h3> Archive </h3><br>" +
           "From: "+email.sender +
@@ -189,10 +202,16 @@ function view_selected_email(email_id,mailbox){
           "<br>"+"Subject: "+email.subject +"<hr><br>"+
           "<p>"+email.body+"</p>"+
           "read:"+email.read+"<br>"+
-          "<button class='btn btn-sm btn-outline-primary' id = 'unarchive' type = 'button'>Unarchive</button>";
+          "<button id = 'unarchive' type = 'button'>Unarchive</button>";
           element.style.border = "1px solid black";
           element.style.padding= "5px 10px";
-          // Archive when archive button is clicked
+          // Adding the clicked email onto the DOMContent
+          document.querySelector('.container').append(element);
+          // Unarchive when archive button is clicked
+          document.querySelector('button#unarchive').onclick = () =>{
+            unarchive_email(email.id);
+          load_mailbox('inbox')
+          }
         }
 
         document.querySelector('#emails-view').style.display = 'none';
@@ -201,12 +220,6 @@ function view_selected_email(email_id,mailbox){
 
         // Adding the clicked email onto the DOMContent
         document.querySelector('.container').append(element);
-
-        // document.body.appendChild(element)
-      
-        // Mark email as read  
-        email_marked_as_read(email_id)
-
       });
 }// End view_selected_mail()
 
@@ -222,7 +235,6 @@ function email_marked_as_read(email_id){
   
 // archive email when cilcked on archive button
 function archive_email(email_id){
-    alert(`archived`)
     fetch(`/emails/${email_id}`,{
       method: 'PUT',
       body: JSON.stringify({
@@ -233,7 +245,6 @@ function archive_email(email_id){
 
 // unarchive email when cilcked on archive button
 function unarchive_email(email_id){
-    alert(`unarchived`)
     fetch(`/emails/${email_id}`,{
       method: 'PUT',
       body: JSON.stringify({
